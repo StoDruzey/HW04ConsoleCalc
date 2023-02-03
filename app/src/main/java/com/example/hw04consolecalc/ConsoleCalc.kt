@@ -32,7 +32,7 @@ class ConsoleCalc {
             var tempStore = ""
 
             fun numberToRPN() { //frequently repeated block 1 - push number to rpn from temporary store
-                if (flagDigit && unaryMinusFlag) {
+                if (flagDigit) {
                     rpn.add(tempStore)
                     tempStore = ""
                     flagDigit = false
@@ -95,7 +95,10 @@ class ConsoleCalc {
             while (stack.isNotEmpty()) { //when input string is over, push all the operations from stack to output string
                 pushLastOperationFromStackToRPN()
             }
-            return rpn
+
+            rpn.forEach { print("$it ") }
+            println()
+            return rpn.toList()
         }
 
         fun computer(rpn: List<String>): String {

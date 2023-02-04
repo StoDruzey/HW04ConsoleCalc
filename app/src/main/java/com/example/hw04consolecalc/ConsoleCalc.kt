@@ -1,9 +1,12 @@
 package com.example.hw04consolecalc
 
+import androidx.core.text.isDigitsOnly
+
 fun main() {
 
     val str = ConsoleCalc.getData()
-    ConsoleCalc.convertToRPN(str)
+    val rpnInStringList = ConsoleCalc.convertStringToRPNinList(str)
+    ConsoleCalc.computer(rpnInStringList)
 }
 
 class ConsoleCalc {
@@ -23,7 +26,7 @@ class ConsoleCalc {
             return expression
         }
 
-        fun convertToRPN(expression: String): List<String> { //converts string to List of Reverse Polish Notation
+        fun convertStringToRPNinList(expression: String): List<String> { //converts string to List of Reverse Polish Notation
 
             val rpn = mutableListOf<String>() //Reverse Polish Notation
             val stack = mutableListOf<String>()
@@ -31,7 +34,7 @@ class ConsoleCalc {
             var unaryMinusFlag = false
             var tempStore = ""
 
-            fun numberToRPN() { //frequently repeated block 1 - push number to rpn from temporary store
+            fun pushNumberFromTempStoreToRPN() { //frequently repeated block 1 - push number to rpn from temporary store
                 if (flagDigit) {
                     rpn.add(tempStore)
                     tempStore = ""
@@ -47,8 +50,16 @@ class ConsoleCalc {
             expression.forEach {
                 when (it) {
                     '~' -> unaryMinusFlag = true
+                    in "0123456789." -> {
+                        if (unaryMinusFlag) {
+                            tempStore += "-"
+                            unaryMinusFlag = false
+                        }
+                        tempStore += it
+                        flagDigit = true
+                    }
                     in "+-/*" -> {
-                        numberToRPN()
+                        pushNumberFromTempStoreToRPN()
                         //ИЛИ операция на вершине стека приоритетнее, или такого же уровня приоритета как o1
                         //… выталкиваем верхний элемент стека в выходную строку; помещаем операцию o1 в стек
                         if (stack.isEmpty()) { //if stack is empty don't check the ops priopity
@@ -71,26 +82,25 @@ class ConsoleCalc {
                     }
                     in "()" -> {
                         if (it == '(') {
+                            if (unaryMinusFlag) {
+                                stack.add("~")
+                                unaryMinusFlag = false
+                            }
                             stack.add(it.toString())
-                        } else if (it == ')') {
-                            numberToRPN()
+                        } else {
+                            pushNumberFromTempStoreToRPN()
                             while (stack.last() != "(") {
                                 pushLastOperationFromStackToRPN()
                             }
                             stack.removeLast() //removing "(" from stack
+                            if (stack.last() == "~") { //if unary minus is before opening bracket, push it from the stack to rpn
+                                pushLastOperationFromStackToRPN()
+                            }
                         }
-                    }
-                    in "0123456789." -> {
-                        if (unaryMinusFlag) {
-                            tempStore += "-"
-                            unaryMinusFlag = false
-                        }
-                        tempStore += it
-                        flagDigit = true
                     }
                 }
             }
-            numberToRPN() //adding number to output string if last
+            pushNumberFromTempStoreToRPN() //adding number to output string if last
 
             while (stack.isNotEmpty()) { //when input string is over, push all the operations from stack to output string
                 pushLastOperationFromStackToRPN()
@@ -103,6 +113,9 @@ class ConsoleCalc {
 
         fun computer(rpn: List<String>): String {
             val result: String = ""
+            rpn.forEach {
+
+            }
 
             return result
         }

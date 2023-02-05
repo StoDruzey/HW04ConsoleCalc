@@ -6,7 +6,7 @@ fun main() {
 
     val str = ConsoleCalc.getData()
     val rpnInStringList = ConsoleCalc.convertStringToRPNinList(str)
-    ConsoleCalc.computer(rpnInStringList)
+    println("Result = ${ConsoleCalc.computer(rpnInStringList)}")
 }
 
 class ConsoleCalc {
@@ -19,14 +19,15 @@ class ConsoleCalc {
             expression = expression ?: ""
             println(expression)
             expression = expression.replace("""\s+""".toRegex(), "") //deleting all spaces
-            expression = expression.replace("""[^0123456789.+-/*()]""".toRegex(), "") //deleting unsuitable symbols
-            expression = expression.replace("""(?<!(\d+(\.\d+)?)|\))\-""".toRegex(), "~") //converting unary minus to ~
-
-            println(expression)
+            expression = expression.replace("""[^0123456789.+-/*()]""".toRegex(), "")
+            //deleting unsuitable symbols
+            expression = expression.replace("""(?<!(\d+(\.\d+)?)|\))\-""".toRegex(), "~")
+            //converting unary minus to ~
             return expression
         }
 
-        fun convertStringToRPNinList(expression: String): List<String> { //converts string to List of Reverse Polish Notation
+        fun convertStringToRPNinList(expression: String): List<String> {
+            //converts string to List of Reverse Polish Notation
 
             val rpn = mutableListOf<String>() //Reverse Polish Notation
             val stack = mutableListOf<String>()
@@ -34,7 +35,8 @@ class ConsoleCalc {
             var unaryMinusFlag = false
             var tempStore = ""
 
-            fun pushNumberFromTempStoreToRPN() { //frequently repeated block 1 - push number to rpn from temporary store
+            fun pushNumberFromTempStoreToRPN() {
+                //frequently repeated block 1 - push number to rpn from temporary store
                 if (flagDigit) {
                     rpn.add(tempStore)
                     tempStore = ""
@@ -42,9 +44,9 @@ class ConsoleCalc {
                 }
             }
 
-            fun pushLastOperationFromStackToRPN () { //frequently repeated block 2 - push last operation to rpn from stack
-                rpn.add(stack.last())
-                stack.removeLast()
+            fun pushLastOperationFromStackToRPN () {
+                //frequently repeated block 2 - push last operation to rpn from stack
+                rpn.add(stack.removeLast())
             }
 
             expression.forEach {
@@ -93,7 +95,8 @@ class ConsoleCalc {
                                 pushLastOperationFromStackToRPN()
                             }
                             stack.removeLast() //removing "(" from stack
-                            if (stack.last() == "~") { //if unary minus is before opening bracket, push it from the stack to rpn
+                            if (stack.last() == "~") {
+                                //if unary minus is before opening bracket, push it from the stack to rpn
                                 pushLastOperationFromStackToRPN()
                             }
                         }
@@ -102,7 +105,8 @@ class ConsoleCalc {
             }
             pushNumberFromTempStoreToRPN() //adding number to output string if last
 
-            while (stack.isNotEmpty()) { //when input string is over, push all the operations from stack to output string
+            while (stack.isNotEmpty()) {
+                //when input string is over, push all the operations from the stack to output string
                 pushLastOperationFromStackToRPN()
             }
 
@@ -112,12 +116,43 @@ class ConsoleCalc {
         }
 
         fun computer(rpn: List<String>): String {
-            val result: String = ""
-            rpn.forEach {
-
+            val stack = emptyList<Double>().toMutableList()
+            var operandRight: Double
+            var operandLeft: Double
+            rpn.forEach { token ->
+                when (token) {
+                    "-" -> {
+                        operandRight = stack.removeLast()
+                        operandLeft = stack.removeLast()
+                        stack.add(operandLeft - operandRight)
+                    }
+                    "+" -> {
+                        operandRight = stack.removeLast()
+                        operandLeft = stack.removeLast()
+                        stack.add(operandLeft + operandRight)
+                    }
+                    "*" -> {
+                        operandRight = stack.removeLast()
+                        operandLeft = stack.removeLast()
+                        stack.add(operandLeft * operandRight)
+                    }
+                    "/" -> {
+                        operandRight = stack.removeLast()
+                        operandLeft = stack.removeLast()
+                        stack.add(operandLeft / operandRight)
+                    }
+                    "~" -> {
+                        operandRight = -stack.removeLast()
+                        stack.add(operandRight)
+                    }
+                    else -> {
+                        stack.add(token.toDouble())
+                    }
+                }
             }
-
-            return result
+            stack.forEach { print("Stack = $it ") }
+            println()
+            return stack.removeLast().toString()
         }
     }
 }

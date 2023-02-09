@@ -17,12 +17,10 @@ class ConsoleCalc {
             println("Enter the expression: ")
             var expression: String? = readlnOrNull()
             expression = expression ?: ""
-            println(expression)
-            expression = expression.replace("""\s+""".toRegex(), "") //deleting all spaces
-            expression = expression.replace("""[^0123456789.+-/*()]""".toRegex(), "")
-            //deleting unsuitable symbols
+            expression = expression.replace("""[^0123456789.+-/*()]|\s+""".toRegex(), "")
+            //deleting unsuitable symbols (if space or not digit, operation, bracket)
             expression = expression.replace("""(?<!(\d+(\.\d+)?)|\))\-""".toRegex(), "~")
-            //converting unary minus to ~
+            //converting unary minus to ~ (if before "-" not number or closing bracket)
             return expression
         }
 
@@ -76,12 +74,12 @@ class ConsoleCalc {
                                 unaryMinusFlag = false
                             }
                             stack.add(it.toString())
-                        } else {
+                        } else { // if it == ")"
                             pushNumberFromNumberTempStoreToRPN()
                             while (stack.last() != "(") {
                                 pushLastOperationFromStackToRPN()
                             }
-                            stack.removeLast() //removing "(" from stack
+                            stack.removeLast() //removing "(" from the stack
                             if (stack.last() == "~") {
                                 //if unary minus is before opening bracket, push it from the stack to rpn
                                 pushLastOperationFromStackToRPN()
@@ -106,7 +104,7 @@ class ConsoleCalc {
             val stack = emptyList<Double>().toMutableList() //Computer stack
             var operandRight: Double
             var operandLeft: Double
-            var index = 0
+            var index = 0 //action's order
             rpn.forEach { token ->
                 when (token) {
                     "-" -> {
@@ -148,7 +146,7 @@ class ConsoleCalc {
                         println()
                         ++index
                     }
-                    else -> {
+                    else -> { //if token is number
                         stack.add(token.toDouble())
                     }
                 }

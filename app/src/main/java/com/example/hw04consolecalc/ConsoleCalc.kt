@@ -30,16 +30,16 @@ class ConsoleCalc {
             //converts string to List of Reverse Polish Notation
 
             val rpn = mutableListOf<String>() //Reverse Polish Notation
-            val stack = mutableListOf<String>()
-            var flagDigit = false
-            var unaryMinusFlag = false
-            var tempStore = ""
+            val stack = mutableListOf<String>() //Stack for operations
+            var flagDigit = false //If number in string is detected
+            var unaryMinusFlag = false //If unary minus before number or bracket
+            var numberTempStore = "" //Temp store for digits
 
-            fun pushNumberFromTempStoreToRPN() {
+            fun pushNumberFromNumberTempStoreToRPN() {
                 //frequently repeated block 1 - push number to rpn from temporary store
                 if (flagDigit) {
-                    rpn.add(tempStore)
-                    tempStore = ""
+                    rpn.add(numberTempStore)
+                    numberTempStore = ""
                     flagDigit = false
                 }
             }
@@ -54,33 +54,20 @@ class ConsoleCalc {
                     '~' -> unaryMinusFlag = true
                     in "0123456789." -> {
                         if (unaryMinusFlag) {
-                            tempStore += "-"
+                            numberTempStore += "-"
                             unaryMinusFlag = false
                         }
-                        tempStore += it
+                        numberTempStore += it
                         flagDigit = true
                     }
                     in "+-/*" -> {
-                        pushNumberFromTempStoreToRPN()
-                        //ИЛИ операция на вершине стека приоритетнее, или такого же уровня приоритета как o1
+                        pushNumberFromNumberTempStoreToRPN()
+                        //while операция на вершине стека приоритетнее, или такого же уровня приоритета как o1
                         //… выталкиваем верхний элемент стека в выходную строку; помещаем операцию o1 в стек
-                        if (stack.isEmpty()) { //if stack is empty don't check the ops priopity
-                            stack.add(it.toString())
-                        } else { //checking operation priority
-                            when (stack.last()) {
-                                "(" -> stack.add(it.toString())
-                                in "*/" -> {
-                                    pushLastOperationFromStackToRPN()
-                                    stack.add(it.toString())
-                                }
-                                in "+-" -> if (it in "+-") {
-                                    pushLastOperationFromStackToRPN()
-                                    stack.add(it.toString())
-                                } else {
-                                    stack.add(it.toString())
-                                }
-                            }
+                        while (!stack.isEmpty() && (stack.last() in "*/" || stack.last() in "+-" && it in "+-")) {
+                            pushLastOperationFromStackToRPN()
                         }
+                        stack.add(it.toString())
                     }
                     in "()" -> {
                         if (it == '(') {
@@ -90,7 +77,7 @@ class ConsoleCalc {
                             }
                             stack.add(it.toString())
                         } else {
-                            pushNumberFromTempStoreToRPN()
+                            pushNumberFromNumberTempStoreToRPN()
                             while (stack.last() != "(") {
                                 pushLastOperationFromStackToRPN()
                             }
@@ -103,7 +90,7 @@ class ConsoleCalc {
                     }
                 }
             }
-            pushNumberFromTempStoreToRPN() //adding number to output string if last
+            pushNumberFromNumberTempStoreToRPN() //adding number to output string if last
 
             while (stack.isNotEmpty()) {
                 //when input string is over, push all the operations from the stack to output string
@@ -116,34 +103,45 @@ class ConsoleCalc {
         }
 
         fun computer(rpn: List<String>): String {
-            val stack = emptyList<Double>().toMutableList()
+            val stack = emptyList<Double>().toMutableList() //Computer stack
             var operandRight: Double
             var operandLeft: Double
-            rpn.forEach { token ->
+            rpn.forEachIndexed { index, token ->
+//                print("${index + 1}) ")
                 when (token) {
                     "-" -> {
                         operandRight = stack.removeLast()
                         operandLeft = stack.removeLast()
                         stack.add(operandLeft - operandRight)
+                        print("${index + 1}) $operandLeft - $operandRight = ${operandLeft - operandRight}")
+                        println()
                     }
                     "+" -> {
                         operandRight = stack.removeLast()
                         operandLeft = stack.removeLast()
                         stack.add(operandLeft + operandRight)
+                        print("${index + 1}) $operandLeft + $operandRight = ${operandLeft + operandRight}")
+                        println()
                     }
                     "*" -> {
                         operandRight = stack.removeLast()
                         operandLeft = stack.removeLast()
                         stack.add(operandLeft * operandRight)
+                        print("${index + 1}) $operandLeft * $operandRight = ${operandLeft * operandRight}")
+                        println()
                     }
                     "/" -> {
                         operandRight = stack.removeLast()
                         operandLeft = stack.removeLast()
                         stack.add(operandLeft / operandRight)
+                        print("${index + 1}) $operandLeft / $operandRight = ${operandLeft / operandRight}")
+                        println()
                     }
                     "~" -> {
                         operandRight = -stack.removeLast()
                         stack.add(operandRight)
+                        print("${index + 1}) $operandRight = $operandRight")
+                        println()
                     }
                     else -> {
                         stack.add(token.toDouble())

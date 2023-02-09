@@ -106,8 +106,8 @@ class ConsoleCalc {
             val stack = emptyList<Double>().toMutableList() //Computer stack
             var operandRight: Double
             var operandLeft: Double
-            rpn.forEachIndexed { index, token ->
-//                print("${index + 1}) ")
+            var index = 0
+            rpn.forEach { token ->
                 when (token) {
                     "-" -> {
                         operandRight = stack.removeLast()
@@ -115,6 +115,7 @@ class ConsoleCalc {
                         stack.add(operandLeft - operandRight)
                         print("${index + 1}) $operandLeft - $operandRight = ${operandLeft - operandRight}")
                         println()
+                        ++index
                     }
                     "+" -> {
                         operandRight = stack.removeLast()
@@ -122,6 +123,7 @@ class ConsoleCalc {
                         stack.add(operandLeft + operandRight)
                         print("${index + 1}) $operandLeft + $operandRight = ${operandLeft + operandRight}")
                         println()
+                        ++index
                     }
                     "*" -> {
                         operandRight = stack.removeLast()
@@ -129,6 +131,7 @@ class ConsoleCalc {
                         stack.add(operandLeft * operandRight)
                         print("${index + 1}) $operandLeft * $operandRight = ${operandLeft * operandRight}")
                         println()
+                        ++index
                     }
                     "/" -> {
                         operandRight = stack.removeLast()
@@ -136,20 +139,20 @@ class ConsoleCalc {
                         stack.add(operandLeft / operandRight)
                         print("${index + 1}) $operandLeft / $operandRight = ${operandLeft / operandRight}")
                         println()
+                        ++index
                     }
                     "~" -> {
                         operandRight = -stack.removeLast()
                         stack.add(operandRight)
                         print("${index + 1}) $operandRight = $operandRight")
                         println()
+                        ++index
                     }
                     else -> {
                         stack.add(token.toDouble())
                     }
                 }
             }
-            stack.forEach { print("Stack = $it ") }
-            println()
             return stack.removeLast().toString()
         }
     }
